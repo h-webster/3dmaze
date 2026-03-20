@@ -1,12 +1,15 @@
 const W = 600;
 const H = 600;
 let playerX = W/2;
-const SPEED = 2;
-const TURN_SPEED = 3;
+const SPEED = 0.09;
+const TURN_SPEED = 0.2;
 let playerY = H/2;
 const playerW = 20;
 const playerH = 20;
 const POV = 0.66;
+let time = 0;
+let finalTime = 0;
+let highscore = 99999999999;
 let theta = 0;
 let hasWon = 0;
 let rayLength = 150;
@@ -31,15 +34,44 @@ const world = [
 function setup() {
   createCanvas(W, H);
   textSize(32);
+  // load highscore
+  let savedScore = localStorage.getItem("mazeHighscore");
+  if (savedScore !== null) {
+    highscore = parseFloat(savedScore);
+  }
 }
+function convertTime(t) { 
+  let minutes = floor(t / 1000 / 60);
+  let seconds = floor(t / 1000) % 60;
+  let milliseconds = floor(t % 1000);
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+  let displayTime = minutes + ":" + seconds + ":" + milliseconds;
 
+  return displayTime;
+}
+function displayTimer() {
+  textSize(32);
+  text(convertTime(time), 20, 50);
+}
 function draw() {
   background(220);
 
   if (hasWon == 1) {
+    noStroke();
+    textSize(32);
     text("You have beaten the maze!", W/5, H/2);
+    if (finalTime < highscore) {
+      highscore = finalTime;
+      localStorage.setItem("mazeHighscore", highscore);
+    }
+    text("Time: " + convertTime(finalTime) + ", Highscore: " + convertTime(highscore), 10, H/2 + 30);
+    textSize(25);
+    text("Click or press 'r' to play again!", W/5, H/2 + 60);
     return;
   }
+  time += deltaTime;
   const tileW = W / world[0].length;
   const tileH = H / world.length;
   
@@ -123,11 +155,18 @@ function draw() {
 
   let moveX = 0;
   let moveY = 0;
-
-  if (keyIsDown(87)) { moveX += dirX; moveY += dirY; } // W
-  if (keyIsDown(83)) { moveX -= dirX; moveY -= dirY; } // S
-  if (keyIsDown(65)) { moveX += dirY; moveY -= dirX; } // A (Strafe)
-  if (keyIsDown(68)) { moveX -= dirY; moveY += dirX; } // D (Strafe)
+  if (keyIsDown(87)) { // W
+    moveX += dirX; moveY += dirY;
+  } 
+  if (keyIsDown(83)) { // S
+    moveX -= dirX; moveY -= dirY;
+  } 
+  if (keyIsDown(65)) { // A 
+    moveX += dirY; moveY -= dirX;
+  } 
+  if (keyIsDown(68)) { // D
+    moveX -= dirY; moveY += dirX;
+  }
 
   if (moveX !== 0 || moveY !== 0) {
     // Normalize movement so diagonal isn't faster
@@ -135,8 +174,8 @@ function draw() {
     moveX /= mag;
     moveY /= mag;
 
-    let nextPX = playerX + moveX * SPEED;
-    let nextPY = playerY + moveY * SPEED;
+    let nextPX = playerX + moveX * SPEED * deltaTime;
+    let nextPY = playerY + moveY * SPEED * deltaTime;
     
     let margin = 0.2; 
 
@@ -153,12 +192,36 @@ function draw() {
     }
 
     if (world[floor(gridYWithMargin)][floor(pos.x)] === '3') {
-      console.log("You win!");
+      finalTime = time;
       hasWon = 1;
     }
   }
 
   // 4. Rotation
-  if (keyIsDown(LEFT_ARROW)) theta -= TURN_SPEED;
-  if (keyIsDown(RIGHT_ARROW)) theta += TURN_SPEED;
+  if (keyIsDown(LEFT_ARROW)) {
+    theta -= TURN_SPEED * deltaTime;
+  }
+  if (keyIsDown(RIGHT_ARROW)) {
+    theta += TURN_SPEED * deltaTime;
+  }
+  displayTimer();
+}
+
+function mouseClicked() {
+  if (hasWon == 0) {
+    return;
+  }
+  resetGame(); 
+}
+function keyPressed() {
+  if (key === 'r') {
+    resetGame();
+  }
+}
+function resetGame() {
+  hasWon = 0;
+  time = 0;
+  playerX = W/2;
+  playerY = H/2;
+  theta = 0;
 }
