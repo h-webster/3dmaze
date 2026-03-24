@@ -26,10 +26,32 @@ main {
   width: calc(50% - 300px);
   color: white;
 }
+.right-box {
+  order: 3;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: calc(50% - 300px);
+  color: white;
+}
 canvas {
   margin: 0;
   display: block;
 }
 a {
   color: #7ef0ff;
+}
+button {
+  width: 150px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: aliceblue;
+  transition: transform 0.2s ease-in;
+}
+button:hover {
+  transform: scale(1.1);
+}
+.right-box h1 {
+  margin: 0px;
 }
