@@ -47,6 +47,9 @@ function convertTime(t) {
   if (seconds < 10) {
     seconds = "0" + seconds;
   }
+  if (milliseconds < 100) {
+    milliseconds = "0" + milliseconds
+  }
   let displayTime = minutes + ":" + seconds + ":" + milliseconds;
 
   return displayTime;
